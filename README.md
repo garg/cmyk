@@ -30,7 +30,9 @@ Use various color harmonies to pick colors.
 
 ![image](https://cloud.githubusercontent.com/assets/16932/24085846/9f44b222-0cd9-11e7-926c-3a15912a69e9.png)
 
-# Export Palettes to a file in the cross platform Adobe Swatch Exchange file format
+# Export Palettes
+
+Export Palettes to a file in the cross platform Adobe Swatch Exchange file format
 
 ![image](https://cloud.githubusercontent.com/assets/16932/24085855/c11bb1e8-0cd9-11e7-8a0b-2aa9dfd3aac6.png)
 
