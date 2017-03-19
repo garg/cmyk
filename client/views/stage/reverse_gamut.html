@@ -1,0 +1,40 @@
+<template name="reverseGamut">
+    <div class="row">
+        <div class="col-lg-8">
+            {{> reverseGamutImageLoader}}
+
+        </div>
+        <div class="col-lg-4">
+
+            {{> reverseGamutCircle}}
+        </div>
+    </div>
+</template>
+
+<template name="reverseGamutImageLoader">
+    <ul class="nav nav-tabs">
+        <li><a href="/stage/harmony">Harmonies</a></li>
+        <li><a href="/stage/gamut">Gamut Masks</a></li>
+        <li><a href="/stage/image">Image</a></li>
+        <li><a href="/stage/reverse">Reverse Gamut</a></li>
+    </ul>
+    <ul class="nav nav-pills">
+        <li><a href="#" onclick="cymk.colorWheel.loadColorsDefault();">Get Palette</a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setHarmony('Analogous');">Dullest</a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setHarmony('Clash');">Custom</a></li>
+    </ul>
+    <div class="childDiv">
+        <p>Click and drag an image here or</p>
+        <form id="file-form" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="extra-data" multiple>
+            <input type="file" id="file-input" name="file-input" multiple>
+        </form>
+    </div>
+    <button id="btnImageAddSwatches" style="float:right; position: relative; top: 50px; right: 50px;" type="submit" class="btn btn-primary btnAddToPalette" disabled="disabled">Get Mask</button>
+    <canvas id="dropZone"></canvas>
+</template>
+
+<template name="reverseGamutCircle">
+    <canvas id="reverseGamutCircle"></canvas>
+
+</template>

@@ -1,0 +1,15 @@
+<template name="layout">
+    <div class="container">
+        <div class="row">
+            {{> header }}
+            {{> meteorErrors}}
+            <div id="main" class="">
+                {{> yield}}
+            </div>
+        </div>
+
+    </div>
+    {{>analytics}}
+</template>
+
+<template name="analytics"></template>

@@ -1,0 +1,39 @@
+<template name="harmony">
+    <div class="row">
+        <div class="col-lg-8">
+
+           {{> harmonyCirc}}
+
+        </div>
+        <div class="col-lg-4">
+            {{> palette}}
+        </div>
+    </div>
+</template>
+
+<template name="harmonyCirc">
+    <ul class="nav nav-tabs">
+        <li><a href="/stage/harmony">Harmonies</a></li>
+        <li><a href="/stage/gamut">Gamut Masks</a></li>
+        <li><a href="/stage/image">Image</a></li>
+        <li><a href="/stage/reverse">Reverse Gamut</a></li>
+    </ul>
+    <ul class="nav nav-pills">
+        <li><a href="#" onclick="cymk.colorWheel.setHarmony('Neutral');"><img src="/neutral.png" title="Neutral" alt="Neutral"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setHarmony('Analogous');"><img src="/analogous.png" title="Analogous" alt="Analogous"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setHarmony('Clash');"><img src="/clash.png" title="Clash" alt="Clash"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setHarmony('Complementary');"><img src="/complementary.png" title="Complementary" alt="Complementary"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setHarmony('Split-Complementary');"><img src="/splitcomplementary.png" title="Split Complementary" alt="Split Complementary"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setHarmony('Triadic');"><img src="/triadic.png" title="Triadic" alt="Triadic"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setHarmony('Tetradic');"><img src="/tetradic.png" title="Tetradic" alt="Tetradic"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setHarmony('Four-Tone');"><img src="/fourTone.png" title="Four Tone" alt="Four Tone"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setHarmony('Five-Tone');"><img src="/fiveTone.png" title="Five Tone" alt="Five Tone"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setHarmony('Six-Tone');"><img src="/sixTone.png" title="Six Tone" alt="Six Tone"></a></li>
+    </ul>
+
+    <button style="float:right; position: relative; top: 50px; right: 50px;" type="submit" class="btn btn-primary btnAddToPalette">Add Swatches to Palette</button>
+    <canvas id="myCanvas">Your browser has no Canvas Support</canvas>
+
+
+
+</template>

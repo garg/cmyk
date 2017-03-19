@@ -1,0 +1,38 @@
+<template name="gamut">
+    <div class="row">
+        <div class="col-lg-8">
+            {{> gamutCirc}}
+
+        </div>
+        <div class="col-lg-4">
+
+            {{> palette}}
+        </div>
+    </div>
+</template>
+
+<template name="gamutCirc">
+    <ul class="nav nav-tabs">
+        <li><a href="/stage/harmony">Harmonies</a></li>
+        <li><a href="/stage/gamut">Gamut Masks</a></li>
+        <li><a href="/stage/image">Image</a></li>
+        <li><a href="/stage/reverse">Reverse Gamut</a></li>
+    </ul>
+    <ul class="nav nav-pills">
+        <li><a href="#" onclick="cymk.colorWheel.setGamutShape('fiveSidedPolygon');"><img src="/polygon.png" title="Five Sided Polygon" alt="Five Sided Polygon"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setGamutShape('thinTriangle');"><img src="/thintriangle.png" title="Thin Triangle" alt="Thin Triangle"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setGamutShape('secondTriangle');"><img src="/secondtriangle.png" title="Second Triangle" alt="Second Triangle"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setGamutShape('thirdTriangle');"><img src="/thirdtriangle.png" title="Third Triangle" alt="Third Triangle"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setGamutShape('complementaryDiamond');"><img src="/complentarytriangle.png" title="complementaryDiamond" alt="complementaryDiamond"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setGamutShape('firstTwoBlobs');"><img src="/firsttwoblobs.png" title="firstTwoBlobs" alt="firstTwoBlobs"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setGamutShape('secondTwoBlobs');"><img src="/secondtwoblobs.png" title="secondTwoBlobs" alt="secondTwoBlobs"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setGamutShape('otherDiamond');"><img src="/otherdiamond.png" title="otherDiamond" alt="otherDiamond"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setGamutShape('halfCircleBlob');"><img src="/halfcircleblob.png" title="halfCircleBlob" alt="halfCircleBlob"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setGamutShape('bunnyBlob');"><img src="/bunnyblob.png" title="bunnyBlob" alt="bunnyBlob"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setGamutShape('rightAngleTriangle');"><img src="/rightangle.png" title="rightAngleTriangle" alt="rightAngleTriangle"></a></li>
+        <li><a href="#" onclick="cymk.colorWheel.setGamutShape('smallEquiTriangle');"><img src="/smallequi.png" title="smallEquiTriangle" alt="smallEquiTriangle"></a></li>
+
+    </ul>
+    <button style="float:right; position: relative; top: 50px; right: 50px;" type="submit" class="btn btn-primary btnAddToPalette">Add Swatches to Palette</button>
+    <canvas id="myCanvas">Your browser has no Canvas Support</canvas>
+</template>

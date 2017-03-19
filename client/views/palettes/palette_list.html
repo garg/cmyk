@@ -1,0 +1,95 @@
+<template name="newPalettes">
+    <div class="row">
+        <div class="col-lg-8">
+            {{> paletteList options}}
+        </div>
+        <div class="col-lg-4">
+            <p>This is the side bar</p>
+        </div>
+    </div>
+</template>
+
+<template name="bestPalettes">
+    <div class="row">
+        <div class="col-lg-8">
+            {{> paletteList options}}
+        </div>
+        <div class="col-lg-4">
+            <p>This is the side bar</p>
+        </div>
+    </div>
+</template>
+
+<template name="paletteList">
+    {{#each palettes}}
+        {{> paletteItem}}
+    {{/each}}
+    {{#if palettesReady}}
+        {{#unless allPalettesLoaded}}
+            <a class="load-more" href="#">Load more</a>
+        {{/unless}}
+    {{else}}
+        <div>{{> spinner}}</div>
+    {{/if}}
+</template>
+
+<template name="paletteItem">
+    <div class="paletteBox">
+
+        <div class="vote">
+            <a href="#" class="upvote btn {{upvotedClass}}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+        </div>
+        <div class="content">
+            <a href="{{pathFor 'palettePage' this}}"><h3>{{name}}</h3></a>
+            <small>{{pluralize votes "Vote"}}, submitted by {{creator}}</small> |
+            <small><a href="{{pathFor 'palettePage' this}}">{{pluralize commentsCount "comment"}}</a></small> |
+            <small>{{#if ownPost}}<a href="{{pathFor 'paletteEdit' this}}">Edit</a>{{/if}}</small>
+            <div class="swatches">
+                {{#each swatches}}<span style="background-color: {{this.hexString}}; height: 40px;  display: inline-block; width: 30px; margin: 0; padding:0;"></span>{{/each}}
+            </div>
+        </div>
+
+    </div>
+</template>
+
+
+<template name="paletteList-old">
+
+    <div class="palettes">
+        <div id="colorList">
+            <div class="row">
+            {{#each palettes}}
+                {{> paletteItem}}
+            {{/each}}
+            </div>
+
+            {{#if palettesReady}}
+                {{#unless allPalettesLoaded}}
+                <a class="load-more" href="#">Load more</a>
+                {{/unless}}
+            {{else}}
+                <div>{{> spinner}}</div>
+            {{/if}}
+        </div>
+    </div>
+</template>
+
+<template name="paletteItem-old">
+            <div class="col-sm-6 col-md-3">
+                <div class="palette">
+                    {{#each swatches}}{{#with rgbValue}}<span style="background-color: rgb({{this.[0]}},{{this.[1]}},{{this.[2]}});" class="swatch"></span>{{/with}}{{/each}}
+                </div>
+
+                <div class="caption">
+                    <a href="#" class="upvote btn {{upvotedClass}}"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                    <p><a href="{{pathFor 'palettePage' this}}">{{name}}</a></p>
+                    <div class="palette-content">
+                        <p>{{pluralize votes "Vote"}}, submitted by {{author}}</p>
+                        <a href="{{pathFor 'palettePage' this}}">{{pluralize commentsCount "comment"}}</a>
+                        {{#if ownPost}}<h4><a href="{{pathFor 'paletteEdit' this}}">Edit</a></h4>{{/if}}
+                    </div>
+                </div>
+            </div>
+</template>
+
+

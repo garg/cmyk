@@ -1,0 +1,92 @@
+<template name="palettePage">
+
+    <div class="row">
+        <div class="col-xs-12 col-md-8 col-lg-8">
+            {{#with this}}
+
+                {{> paletteView}}
+
+                {{> paletteColors}}
+
+            {{/with}}
+
+
+        </div>
+
+        <div class="col-xs-6 col-md-4 col-lg-4">
+            <div class="aboutPalette">
+                <h3>About this Palette</h3>
+                <p>User Information</p>
+            </div>
+            {{> exportPalette}}
+            <div class="commentSection">
+            {{#with this}}
+                <ul>
+                {{#each comments}}
+                    {{> comment}}
+                {{/each}}
+                </ul>
+
+                {{#if currentUser}}
+                    {{> commentSubmit}}
+                {{else}}
+                    <p>Please log in to leave a comment.</p>
+                {{/if}}
+            {{/with}}
+            </div>
+
+
+
+
+        </div>
+    </div>
+
+
+
+</template>
+
+<template name="exportPalette">
+    <h3>Export Palette As:</h3>
+    <a href="#" id="exportASE">ASE (Photoshop, Illustrator)</a>
+
+</template>
+
+<template name="paletteView">
+    <div class="paletteBox">
+        <h3>{{name}}</h3>
+        <div class="content">
+        <div class="swatches">
+            {{#each swatches}}<span style="background-color: {{this.hexString}}; height: 100px;  display: inline-block; width: 30px; margin: 0; padding:0;"></span>{{/each}}
+        </div>
+        </div>
+    </div>
+</template>
+
+<template name="paletteColors">
+    <h3>Colors</h3>
+    {{#each swatches}}
+    <div class="colorDetail">
+        <h4>{{this.longName}} ({{this.simpleName}})</h4>
+        <div id="{{this._id}}">
+            <span style="height: 30px; background-color: {{this.hexString}}; display: block;"></span>
+        </div>
+        <div class="info">
+            <div class="col-md-1">
+                <small>Hex: {{this.hexValue}}</small>
+            </div>
+            <div class="col-md-1">
+                <small>{{this.rgbString}}</small>
+            </div>
+            <div class="col-md-1">
+                <small>{{this.hsvString}}</small>
+            </div>
+            <div class="col-md-1">
+                <small>{{this.hslString}}</small>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+
+    {{/each}}
+
+</template>
