@@ -448,18 +448,17 @@ const ReverseGamut = ({ onAddToPalette, wheelMode = 'regular' }) => {
                 Change Image
               </button>
             </div>
+            {extractedColors.length > 0 && (
+              <button 
+                className="add-colors-button"
+                onClick={handleAddToPalette}
+              >
+                Add Colors to Palette
+              </button>
+            )}
           </div>
         )}
       </div>
-
-      {extractedColors.length > 0 && (
-        <button 
-          className="add-colors-button"
-          onClick={handleAddToPalette}
-        >
-          Add Colors to Palette
-        </button>
-      )}
     </div>
   );
 };

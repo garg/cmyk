@@ -63,52 +63,29 @@
   top: 20px;
 }
 
-.gamut-controls select {
-  margin-bottom: 5px;
+.gamut-controls-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.gamut-controls .extract-colors-button {
+.gamut-controls select {
   margin-bottom: 0;
 }
 
 .wheel-mode-select {
-  margin-top: 10px;
-}
-
-.extract-colors-button {
-  width: 100%;
-  padding: 12px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 15px;
-}
-
-.extract-colors-button:hover {
-  background-color: #45a049;
-  transform: translateY(-1px);
-}
-
-.extract-colors-button:active {
-  transform: translateY(0);
+  margin-top: 0;
 }
 
 .extracted-colors {
-  width: 100%;
   margin-top: 20px;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  padding-top: 20px;
+  border-top: 1px solid #eee;
 }
 
 .color-swatches {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   margin-bottom: 15px;
 }
@@ -122,6 +99,28 @@
 
 .color-swatch:hover {
   transform: scale(1.1);
+}
+
+.extract-colors-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 0;
+}
+
+.extract-colors-button:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
+
+.extract-colors-button:active {
+  transform: translateY(0);
 }
 
 .add-colors-button {
@@ -352,5 +351,9 @@ button:not(.tab-button):active {
 
   .wheel-wrapper canvas {
     touch-action: none;
+  }
+  
+  .color-swatches {
+    grid-template-columns: repeat(4, 1fr);
   }
 }

@@ -378,40 +378,63 @@ const ColorWheel = ({
     <div className="color-wheel-container">
       <div className="controls-wrapper">
         {selectedGamutShape && (
-          <div className="gamut-controls">
-            <select 
-              className="gamut-select"
-              value={selectedGamutShape}
-              onChange={(e) => setSelectedGamutShape(e.target.value)}
-            >
-              {Object.keys(GAMUT_SHAPES).map(shape => (
-                <option key={shape} value={shape}>
-                  {shape.split(/(?=[A-Z])/).join(' ')}
-                </option>
-              ))}
-            </select>
-            <select
-              className="wheel-mode-select"
-              value={wheelMode}
-              onChange={(e) => setWheelMode(e.target.value)}
-            >
-              <option value="regular">Regular Wheel</option>
-              <option value="yurmby">YURMBY Wheel</option>
-            </select>
-            {gamutMask && (
-              <button 
-                className="extract-colors-button"
-                onClick={extractColorsFromGamutArea}
-              >
-                Extract Colors from Gamut Area
-              </button>
-            )}
-          </div>
+          <>
+            <div className="gamut-controls">
+              <div className="gamut-controls-inputs">
+                <select 
+                  className="gamut-select"
+                  value={selectedGamutShape}
+                  onChange={(e) => setSelectedGamutShape(e.target.value)}
+                >
+                  {Object.keys(GAMUT_SHAPES).map(shape => (
+                    <option key={shape} value={shape}>
+                      {shape.split(/(?=[A-Z])/).join(' ')}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="wheel-mode-select"
+                  value={wheelMode}
+                  onChange={(e) => setWheelMode(e.target.value)}
+                >
+                  <option value="regular">Regular Wheel</option>
+                  <option value="yurmby">YURMBY Wheel</option>
+                </select>
+                {gamutMask && (
+                  <button 
+                    className="extract-colors-button"
+                    onClick={extractColorsFromGamutArea}
+                  >
+                    Extract Colors from Gamut Area
+                  </button>
+                )}
+              </div>
+              {extractedColors.length > 0 && (
+                <div className="extracted-colors">
+                  <div className="color-swatches">
+                    {extractedColors.map((color, index) => (
+                      <div
+                        key={index}
+                        className="color-swatch"
+                        style={{ backgroundColor: color.hexString }}
+                        title={`${color.hexString}\n${color.rgbString}`}
+                      />
+                    ))}
+                  </div>
+                  <button 
+                    className="add-colors-button"
+                    onClick={handleAddToPalette}
+                  >
+                    Add Colors to Palette
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
 
       <div className="wheel-wrapper">
-        
         <Stage
           width={actualDiameter}
           height={actualDiameter}
@@ -565,27 +588,6 @@ const ColorWheel = ({
           </Layer>
         </Stage>
       </div>
-
-      {extractedColors.length > 0 && (
-        <div className="extracted-colors">
-          <div className="color-swatches">
-            {extractedColors.map((color, index) => (
-              <div
-                key={index}
-                className="color-swatch"
-                style={{ backgroundColor: color.hexString }}
-                title={`${color.hexString}\n${color.rgbString}`}
-              />
-            ))}
-          </div>
-          <button 
-            className="add-colors-button"
-            onClick={handleAddToPalette}
-          >
-            Add Colors to Palette
-          </button>
-        </div>
-      )}
     </div>
   );
 };
