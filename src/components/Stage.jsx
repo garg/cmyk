@@ -1,24 +1,36 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ColorWheel from './ColorWheel';
 import HarmonyWheel from './HarmonyWheel';
 import ImageColorPicker from './ImageColorPicker';
 import ReverseGamut from './ReverseGamut';
 import usePalettes from '../hooks/usePalettes';
-import { useToast } from '../components/Toast';
-import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { useToast } from './Toast';
 import './Stage.css';
 
-const Stage = () => {
-  const [activeTab, setActiveTab] = useState('reverse');
+const Stage = ({ initialMode }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(initialMode || 'reverse');
   const [wheelMode, setWheelMode] = useState('regular');
   const [paletteName, setPaletteName] = useState('');
   const [localPalette, setLocalPalette] = useState([]);
-  const navigate = useNavigate();
   const { createPalette } = usePalettes();
   const { showToast } = useToast();
-  const { user } = useAuth();
+
+  // Update activeTab based on URL
+  useEffect(() => {
+    const pathToMode = {
+      '/harmonies': 'harmony',
+      '/gamut-masks': 'gamut',
+      '/image-picker': 'image',
+      '/reverse-gamut': 'reverse'
+    };
+    const mode = pathToMode[location.pathname];
+    if (mode) {
+      setActiveTab(mode);
+    }
+  }, [location.pathname]);
 
   const handleAddToPalette = (colors) => {
     setLocalPalette(prev => [...prev, ...colors]);
@@ -44,20 +56,14 @@ const Stage = () => {
     }
 
     try {
-      const palette = await createPalette({
+      await createPalette({
         name: paletteName,
-        colors: localPalette.map(color => ({
-          hex: color.hexString,
-          rgb: color.rgbString,
-          hsv: color.hsvString,
-          hsl: color.hslString,
-          name: color.longName || color.hexString
-        }))
+        colors: localPalette.map(color => color.hexString)
       });
       setLocalPalette([]);
       setPaletteName('');
       showToast('Palette saved successfully!', 'success');
-      navigate(`/palettes/${palette._id}`);
+      navigate('/palettes');
     } catch (error) {
       showToast(`Error saving palette: ${error.message}`, 'error');
     }
@@ -108,25 +114,25 @@ const Stage = () => {
             <div className="stage-tabs">
               <button 
                 className={`tab-button ${activeTab === 'harmony' ? 'active' : ''}`}
-                onClick={() => setActiveTab('harmony')}
+                onClick={() => navigate('/harmonies')}
               >
                 Harmonies
               </button>
               <button 
                 className={`tab-button ${activeTab === 'gamut' ? 'active' : ''}`}
-                onClick={() => setActiveTab('gamut')}
+                onClick={() => navigate('/gamut-masks')}
               >
                 Gamut Masks
               </button>
               <button 
                 className={`tab-button ${activeTab === 'image' ? 'active' : ''}`}
-                onClick={() => setActiveTab('image')}
+                onClick={() => navigate('/image-picker')}
               >
                 Image
               </button>
               <button 
                 className={`tab-button ${activeTab === 'reverse' ? 'active' : ''}`}
-                onClick={() => setActiveTab('reverse')}
+                onClick={() => navigate('/reverse-gamut')}
               >
                 Reverse Gamut
               </button>
@@ -148,38 +154,41 @@ const Stage = () => {
         </div>
 
         <div className="stage-right">
-          {user ? (
-            <form onSubmit={handleSubmit} className="palette-form">
-              <div className="form-group">
-                <label htmlFor="paletteName">Name</label>
-                <input
-                  id="paletteName"
-                  type="text"
-                  value={paletteName}
-                  onChange={(e) => setPaletteName(e.target.value)}
-                  placeholder="Palette Name"
-                  className="palette-name-input"
-                />
-              </div>
-              <button 
-                type="submit" 
-                className="submit-button"
-                disabled={!paletteName.trim() || localPalette.length === 0}
-              >
-                Save Palette
-              </button>
-            </form>
-          ) : (
-            <div className="login-prompt">
-              <p>Log in to save your palettes</p>
-              <Link to="/login" className="login-button">
-                Log In
-              </Link>
+          <form onSubmit={handleSubmit} className="palette-form">
+            <div className="form-group">
+              <label htmlFor="paletteName">Name</label>
+              <input
+                id="paletteName"
+                type="text"
+                value={paletteName}
+                onChange={(e) => setPaletteName(e.target.value)}
+                placeholder="Palette Name"
+                className="palette-name-input"
+              />
             </div>
-          )}
+            <button 
+              type="submit" 
+              className="submit-button"
+              disabled={!paletteName.trim() || localPalette.length === 0}
+            >
+              Save Palette
+            </button>
+          </form>
 
           <div className="local-palette">
-            <h3>Palette</h3>
+            <div className="local-palette-header">
+              <h3>Current Palette</h3>
+              <button 
+                className="clear-button"
+                onClick={() => {
+                  setLocalPalette([]);
+                  showToast('Palette cleared', 'success');
+                }}
+                disabled={localPalette.length === 0}
+              >
+                Clear Palette
+              </button>
+            </div>
             {localPalette.length > 0 ? (
               <div className="color-list">
                 {localPalette.map((color, index) => (
@@ -199,7 +208,7 @@ const Stage = () => {
                       style={{ backgroundColor: color.hexString }}
                     />
                     <div className="color-info">
-                      <div>Hex: {color.hex}</div>
+                      <div>Hex: {color.hexString}</div>
                       <div>{color.rgbString}</div>
                       <div>{color.hsvString}</div>
                       <div>{color.hslString}</div>

@@ -130,8 +130,8 @@ const HarmonyWheel = ({
           points: [radius, radius, x1, y1, x2, y2],
           fill: color,
           closed: true,
-          stroke: 'black',
-          strokeWidth: 1
+          stroke: 'transparent',
+          strokeWidth: 0
         });
       }
       setLines(newLines);
@@ -165,13 +165,19 @@ const HarmonyWheel = ({
     const dy = y - radius;
     const angle = Math.atan2(dy, dx);
     const distance = Math.sqrt(dx * dx + dy * dy);
+    const maxDistance = radius * 0.8; // Match the harmony points radius
     
-    let hue = ((angle + Math.PI) / (2 * Math.PI)) * 360;
+    // Normalize the distance to match harmony points
+    const normalizedDistance = Math.min(distance, maxDistance);
+    const saturationFactor = normalizedDistance / maxDistance;
+    
+    // Adjust angle by 180 degrees to align with harmony points
+    let hue = (((angle + Math.PI) / (2 * Math.PI)) * 360 + 180) % 360;
     if (wheelMode === 'yurmby') {
       hue = snapToYurmby(hue);
     }
     
-    const saturation = (distance / radius) * 100;
+    const saturation = saturationFactor * 100;
     const lightness = 50;
 
     const rgb = hslToRgb(hue, saturation, lightness);
@@ -271,9 +277,6 @@ const HarmonyWheel = ({
       </div>
 
       <div className="wheel-wrapper">
-        <div className="rotation-hint">
-          Use arrow keys or click and drag to rotate harmony points
-        </div>
         
         <Stage
           width={actualDiameter}

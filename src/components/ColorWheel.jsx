@@ -402,9 +402,6 @@ const ColorWheel = ({
             Extract Colors from Gamut Area
           </button>
         )}
-        <div className="rotation-hint">
-          Use arrow keys or click and drag to rotate gamut mask
-        </div>
         
         <Stage
           width={actualDiameter}

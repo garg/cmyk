@@ -1,72 +1,92 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import Palettes from '../collections/palettes';
 
 const usePalettes = () => {
   const [palettes, setPalettes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [allLoaded, setAllLoaded] = useState(false);
   const [sortType, setSortType] = useState('new');
 
-  const loadMore = () => {
-    setPage(prev => prev + 1);
+  const loadPalettes = () => {
+    try {
+      const allPalettes = Palettes.getAll();
+      const sortedPalettes = sortPalettes(allPalettes, sortType);
+      setPalettes(sortedPalettes);
+      setError(null);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sortPalettes = (palettesToSort, type) => {
+    switch (type) {
+      case 'popular':
+        return [...palettesToSort].sort((a, b) => (b.votes || 0) - (a.votes || 0));
+      case 'new':
+      default:
+        return [...palettesToSort].sort((a, b) => 
+          new Date(b.createdAt) - new Date(a.createdAt)
+        );
+    }
   };
 
   useEffect(() => {
-    const fetchPalettes = async (type = sortType, pageNum = page) => {
-      setLoading(true);
-      try {
-        const response = await axios.get(`/api/palettes`, {
-          params: {
-            sort: type,
-            page: pageNum,
-            limit: 12
-          }
-        });
-        
-        if (pageNum === 1) {
-          setPalettes(response.data);
-        } else {
-          setPalettes(prev => [...prev, ...response.data]);
-        }
-        
-        setAllLoaded(response.data.length < 12);
-        setSortType(type);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    loadPalettes();
+  }, [sortType]);
 
-    fetchPalettes();
-  }, [page, sortType]);
-
-  const createPalette = async (paletteData) => {
+  const createPalette = (paletteData) => {
     try {
-      const response = await axios.post('/api/palettes', paletteData);
-      setPalettes([response.data, ...palettes]);
+      const newPalette = Palettes.create(paletteData);
+      loadPalettes(); // Reload to maintain sort order
+      return newPalette;
     } catch (err) {
       setError(err);
+      throw err;
     }
   };
 
-  const updatePalette = async (id, updatedData) => {
+  const updatePalette = (id, updatedData) => {
     try {
-      const response = await axios.put(`/api/palettes/${id}`, updatedData);
-      setPalettes(palettes.map(p => p._id === id ? response.data : p));
+      const updated = Palettes.update(id, updatedData);
+      loadPalettes(); // Reload to maintain sort order
+      return updated;
     } catch (err) {
       setError(err);
+      throw err;
     }
   };
 
-  const deletePalette = async (id) => {
+  const deletePalette = (id) => {
     try {
-      await axios.delete(`/api/palettes/${id}`);
-      setPalettes(palettes.filter(p => p._id !== id));
+      Palettes.delete(id);
+      loadPalettes(); // Reload to maintain sort order
     } catch (err) {
       setError(err);
+      throw err;
+    }
+  };
+
+  const votePalette = (id) => {
+    try {
+      const updated = Palettes.vote(id);
+      loadPalettes(); // Reload to maintain sort order
+      return updated;
+    } catch (err) {
+      setError(err);
+      throw err;
+    }
+  };
+
+  const unvotePalette = (id) => {
+    try {
+      const updated = Palettes.unvote(id);
+      loadPalettes(); // Reload to maintain sort order
+      return updated;
+    } catch (err) {
+      setError(err);
+      throw err;
     }
   };
 
@@ -74,12 +94,13 @@ const usePalettes = () => {
     palettes,
     loading,
     error,
-    allLoaded,
     createPalette,
     updatePalette,
     deletePalette,
-    loadMore,
-    sortType
+    votePalette,
+    unvotePalette,
+    sortType,
+    setSortType
   };
 };
 
