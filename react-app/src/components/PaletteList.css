@@ -1,0 +1,64 @@
+.palette-list {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.palette-item {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background: #fff;
+}
+
+.palette-item.owner {
+  border-color: #007bff;
+}
+
+.palette-content h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.color-swatches {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.color-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.upvote-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.upvote-button.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.load-more {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.load-more:hover {
+  opacity: 0.9;
+}

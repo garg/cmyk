@@ -1,0 +1,144 @@
+.image-color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.drop-zone {
+  width: 450px;
+  height: 450px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  background-color: #f5f5f5;
+  position: relative;
+  overflow: hidden;
+}
+
+.drop-zone.dragging {
+  border-color: #4CAF50;
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.drop-zone.has-image {
+  border-style: solid;
+  background-color: white;
+}
+
+.drop-zone-content {
+  text-align: center;
+  color: #666;
+}
+
+.drop-zone-content p {
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+.file-select-button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.file-select-button:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
+
+.file-select-button:active {
+  transform: translateY(0);
+}
+
+.extracted-colors {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.color-swatches {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.color-swatch {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  position: relative;
+}
+
+.color-swatch:hover {
+  transform: scale(1.1);
+  z-index: 1;
+}
+
+.color-swatch::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+.add-colors-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.add-colors-button:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
+
+.add-colors-button:active {
+  transform: translateY(0);
+}
+
+.add-colors-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.extracted-colors {
+  animation: fadeIn 0.3s ease-out;
+}
