@@ -185,7 +185,7 @@ const Stage = ({ initialMode }) => {
                     <div className="color-header">
                       <h4>{color.longName || color.hexString}</h4>
                       <button
-                        className="delete-button"
+                        className="palette-color-delete-btn"
                         onClick={() => handleRemoveColor(index)}
                         aria-label="Remove color"
                       >

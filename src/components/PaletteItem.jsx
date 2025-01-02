@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import usePalettes from '../hooks/usePalettes';
 import { useToast } from './Toast';
 
-const PaletteItem = ({ palette }) => {
-  const { votePalette, unvotePalette, deletePalette } = usePalettes();
+const PaletteItem = ({ palette, onDelete }) => {
+  const { votePalette, unvotePalette } = usePalettes();
   const { showToast } = useToast();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -25,7 +25,7 @@ const PaletteItem = ({ palette }) => {
 
   const handleDelete = async () => {
     try {
-      await deletePalette(palette.id);
+      await onDelete(palette.id);
       showToast('Palette deleted successfully', 'success');
       setShowDeleteConfirm(false);
     } catch (error) {

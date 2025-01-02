@@ -104,6 +104,34 @@
   border-top: 1px solid #eee;
 }
 
+.color-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.color-header h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  color: #ff4444;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.delete-button:hover {
+  background-color: rgba(255, 68, 68, 0.1);
+}
+
 .color-swatches {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

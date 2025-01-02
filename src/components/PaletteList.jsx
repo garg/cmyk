@@ -4,7 +4,7 @@ import usePalettes from '../hooks/usePalettes';
 import './PaletteList.css';
 
 const PaletteList = () => {
-  const { palettes, loading, error, sortType, setSortType } = usePalettes();
+  const { palettes, loading, error, sortType, setSortType, deletePalette } = usePalettes();
 
   const handleSortChange = (newSortType) => {
     setSortType(newSortType);
@@ -37,7 +37,11 @@ const PaletteList = () => {
             <p className="no-palettes-message">No palettes yet. Create your first palette!</p>
           ) : (
             palettes.map(palette => (
-              <PaletteItem key={palette.id} palette={palette} />
+              <PaletteItem 
+                key={palette.id} 
+                palette={palette} 
+                onDelete={deletePalette}
+              />
             ))
           )}
         </div>
