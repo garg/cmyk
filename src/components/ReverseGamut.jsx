@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { Stage, Layer, Circle, Group, Label, Tag, Text, Line, Transformer } from 'react-konva';
+import { Stage, Layer, Circle, Group, Label, Tag, Text, Line, Transformer, Rect } from 'react-konva';
 import ColorThief from 'colorthief';
 import tinycolor from 'tinycolor2';
 import './ReverseGamut.css';
@@ -329,19 +329,22 @@ const ReverseGamut = ({ onAddToPalette, wheelMode = 'regular' }) => {
           onTap={checkDeselect}
         >
           <Layer>
-            {/* Draw gamut boundary shape */}
+            {/* Create background rectangle */}
+            <Group>
+              <Rect
+                x={0}
+                y={0}
+                width={diameter}
+                height={diameter}
+                fill="rgba(255,255,255,0.1)"
+              />
+            </Group>
+
+            {/* Draw gamut boundary shape as a mask */}
             {boundaryPoints.length > 0 && (
-              <>
-                <Line
+              <Group>
+                <Group
                   ref={shapeRef}
-                  points={[
-                    ...boundaryPoints.map(point => [point.x, point.y]).flat(),
-                    boundaryPoints[0].x, boundaryPoints[0].y // Close the shape
-                  ]}
-                  stroke="rgba(255,255,255,0.5)"
-                  strokeWidth={1}
-                  closed={true}
-                  fill="rgba(255,255,255,0.1)"
                   draggable
                   onClick={() => setIsSelected(true)}
                   onTap={() => setIsSelected(true)}
@@ -350,22 +353,65 @@ const ReverseGamut = ({ onAddToPalette, wheelMode = 'regular' }) => {
                     const node = shapeRef.current;
                     const scaleX = node.scaleX();
                     const scaleY = node.scaleY();
+                    const rotation = node.rotation();
                     
                     // Reset scale and adjust points
                     node.scaleX(1);
                     node.scaleY(1);
                     
-                    // Update points with new scale
-                    const newPoints = node.points().map((point, i) => {
-                      if (i % 2 === 0) {
-                        return point * scaleX;
+                    // Calculate new points based on scale and rotation
+                    const newPoints = boundaryPoints.map(point => {
+                      // Scale the point
+                      const x = point.x * scaleX;
+                      const y = point.y * scaleY;
+                      
+                      // Apply rotation if any
+                      if (rotation) {
+                        const rad = (rotation * Math.PI) / 180;
+                        const cos = Math.cos(rad);
+                        const sin = Math.sin(rad);
+                        const dx = x - radius;
+                        const dy = y - radius;
+                        return [
+                          radius + (dx * cos - dy * sin),
+                          radius + (dx * sin + dy * cos)
+                        ];
                       }
-                      return point * scaleY;
-                    });
+                      
+                      return [x, y];
+                    }).flat();
                     
-                    node.points(newPoints);
+                    // Update all Line components in the group
+                    node.getChildren(child => child.getClassName() === 'Line')
+                      .forEach(line => line.points(newPoints));
                   }}
-                />
+                >
+                  {/* Border line */}
+                  <Line
+                    points={[
+                      ...boundaryPoints.map(point => [point.x, point.y]).flat(),
+                      boundaryPoints[0].x, boundaryPoints[0].y // Close the shape
+                    ]}
+                    stroke="#ffffff"
+                    strokeWidth={3}
+                    closed={true}
+                    fill="transparent"
+                  />
+                  {/* Mask line */}
+                  <Group
+                    globalCompositeOperation="destination-out"
+                  >
+                    <Line
+                      points={[
+                        ...boundaryPoints.map(point => [point.x, point.y]).flat(),
+                        boundaryPoints[0].x, boundaryPoints[0].y // Close the shape
+                      ]}
+                      stroke="transparent"
+                      closed={true}
+                      fill="black"
+                    />
+                  </Group>
+                </Group>
                 {isSelected && (
                   <Transformer
                     ref={transformerRef}
@@ -393,7 +439,7 @@ const ReverseGamut = ({ onAddToPalette, wheelMode = 'regular' }) => {
                     enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
                   />
                 )}
-              </>
+              </Group>
             )}
             
             {/* Draw extracted color points */}
