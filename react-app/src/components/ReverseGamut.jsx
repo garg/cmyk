@@ -220,21 +220,6 @@ const ReverseGamut = ({ onAddToPalette, wheelMode = 'regular' }) => {
         <div className="color-wheel-background" />
         <Stage width={diameter} height={diameter} style={{ position: 'absolute', top: 0, left: 0 }}>
           <Layer>
-            {/* Draw saturation gradient overlay */}
-            <Circle
-              x={radius}
-              y={radius}
-              radius={radius}
-              fillRadialGradientStartPoint={{ x: radius, y: radius }}
-              fillRadialGradientStartRadius={0}
-              fillRadialGradientEndPoint={{ x: radius, y: radius }}
-              fillRadialGradientEndRadius={radius}
-              fillRadialGradientColorStops={[
-                0, 'rgba(255,255,255,1)',
-                1, 'rgba(255,255,255,0)'
-              ]}
-            />
-            
             {/* Draw gamut boundary shape */}
             {boundaryPoints.length > 0 && (
               <Line
