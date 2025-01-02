@@ -13,12 +13,22 @@ const Home = () => {
 
       <div className="features-grid">
         <div className="feature-card">
-          <h3>Color Wheel</h3>
+          <h3>Color Harmonies</h3>
           <p>
-            Interactive color wheel with harmony guides and gamut masks to help you create perfect color combinations.
+            Explore different color harmonies including complementary, analogous, triadic, and more to create balanced color combinations.
           </p>
           <Link to="/stage" className="feature-link">
-            Try Color Wheel →
+            Try Harmonies →
+          </Link>
+        </div>
+
+        <div className="feature-card">
+          <h3>Gamut Masks</h3>
+          <p>
+            Use customizable gamut masks to create color combinations within specific color spaces and constraints.
+          </p>
+          <Link to="/stage" className="feature-link">
+            Try Gamut Masks →
           </Link>
         </div>
 
@@ -39,16 +49,6 @@ const Home = () => {
           </p>
           <Link to="/palettes" className="feature-link">
             View Palettes →
-          </Link>
-        </div>
-
-        <div className="feature-card">
-          <h3>Color Harmonies</h3>
-          <p>
-            Explore different color harmonies including complementary, analogous, triadic, and more.
-          </p>
-          <Link to="/stage" className="feature-link">
-            Explore Harmonies →
           </Link>
         </div>
       </div>

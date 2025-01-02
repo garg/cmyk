@@ -4,19 +4,6 @@ import { hslToRgb, snapToYurmby, createYurmbyGradient } from '../utils/colorUtil
 import tinycolor from 'tinycolor2';
 import './ColorWheel.css';
 
-const HARMONY_MODES = {
-  'Neutral': [0, 15, 30, 45, 60, 75],
-  'Analogous': [0, 30, 60, 90, 120, 150],
-  'Clash': [0, 90, 270],
-  'Complementary': [0, 180],
-  'Split-Complementary': [0, 150, 210],
-  'Triadic': [0, 120, 240],
-  'Tetradic': [0, 90, 180, 270],
-  'Four-Tone': [0, 60, 180, 240],
-  'Five-Tone': [0, 115, 155, 205, 245],
-  'Six-Tone': [0, 30, 120, 150, 240, 270]
-};
-
 const GAMUT_SHAPES = {
   fiveSidedPolygon: [
     { angle: 0, distance: 1 },
@@ -83,27 +70,21 @@ const ColorWheel = ({
   onAddToPalette,
   wheelMode = 'regular' // 'regular' or 'yurmby'
 }) => {
+  const [extractedColors, setExtractedColors] = useState([]);
   const stageRef = useRef(null);
   const gamutGroupRef = useRef(null);
   const transformerRef = useRef(null);
   const canvasRef = useRef(null);
-  const harmonyGroupRef = useRef(null);
   
   const [lines, setLines] = useState([]);
   const [centerCircle, setCenterCircle] = useState(null);
   const [gamutMask, setGamutMask] = useState(null);
   const [rotation, setRotation] = useState(0);
-  const [harmonyMode, setHarmonyMode] = useState('Analogous');
-  const [harmonyPoints, setHarmonyPoints] = useState([]);
   const [tooltip, setTooltip] = useState(null);
   const [selectedGamutShape, setSelectedGamutShape] = useState(null);
-
-  // Update selectedGamutShape when gamutShape prop changes
-  useEffect(() => {
-    setSelectedGamutShape(gamutShape);
-  }, [gamutShape]);
   const [wheelImage, setWheelImage] = useState(null);
   const [actualDiameter, setActualDiameter] = useState(diameter);
+  const [isSelected, setIsSelected] = useState(false);
 
   // Derived values
   const derivedValues = useMemo(() => {
@@ -114,6 +95,11 @@ const ColorWheel = ({
   }, [actualDiameter]);
 
   const { steps, angleStep, radius } = derivedValues;
+
+  // Update selectedGamutShape when gamutShape prop changes
+  useEffect(() => {
+    setSelectedGamutShape(gamutShape);
+  }, [gamutShape]);
 
   // Update diameter based on window size
   useEffect(() => {
@@ -236,19 +222,6 @@ const ColorWheel = ({
     }
   }, [gamutMask]);
 
-  useEffect(() => {
-    if (harmonyMode && HARMONY_MODES[harmonyMode]) {
-      const points = HARMONY_MODES[harmonyMode].map(angle => {
-        const rad = (angle + rotation) * (Math.PI / 180);
-        return {
-          x: Math.cos(rad) * (radius * 0.8),
-          y: Math.sin(rad) * (radius * 0.8)
-        };
-      });
-      setHarmonyPoints(points);
-    }
-  }, [harmonyMode, rotation, radius]);
-
   const getColorAtPoint = useCallback((x, y) => {
     const dx = x - radius;
     const dy = y - radius;
@@ -278,7 +251,27 @@ const ColorWheel = ({
     };
   }, [radius, wheelMode]);
 
-  const handleClick = useCallback((e) => {
+  const checkDeselect = useCallback((e) => {
+    // deselect when clicked on empty area
+    const clickedOnEmpty = e.target === e.target.getStage();
+    if (clickedOnEmpty) {
+      setIsSelected(false);
+    }
+  }, []);
+
+  const isGamutMaskElement = useCallback((target) => {
+    return target === gamutGroupRef.current || 
+      (target.parent && target.parent === gamutGroupRef.current) ||
+      target.attrs.hitStrokeWidth || // Check if it's a gamut mask line
+      (target.className === 'Line' && target.parent === gamutGroupRef.current); // Check for Line elements in gamut mask
+  }, []);
+
+  const handleGamutClick = useCallback((e) => {
+    e.cancelBubble = true;
+    setIsSelected(true);
+  }, []);
+
+  const handleColorSelection = useCallback((e) => {
     const stage = stageRef.current;
     const pointerPos = stage.getPointerPosition();
     const dx = pointerPos.x - radius;
@@ -291,53 +284,94 @@ const ColorWheel = ({
     }
   }, [radius, getColorAtPoint, onColorSelect]);
 
-  const handleAddToPalette = useCallback(() => {
-    if (onAddToPalette && harmonyPoints.length > 0) {
-      const colors = harmonyPoints.map(point => {
-        const x = point.x + radius;
-        const y = point.y + radius;
-        return getColorAtPoint(x, y);
-      });
-      onAddToPalette(colors);
+  const handleStageClick = useCallback((e) => {
+    const target = e.target;
+    if (!gamutShape && !isGamutMaskElement(target)) {
+      handleColorSelection(e);
     }
-  }, [harmonyPoints, getColorAtPoint, onAddToPalette, radius]);
-
-  const handleHarmonyChange = useCallback((mode) => {
-    setHarmonyMode(mode);
-  }, []);
+  }, [isGamutMaskElement, handleColorSelection, gamutShape]);
 
   const handleGamutDragEnd = useCallback((e) => {
     setRotation(e.target.rotation());
   }, []);
 
-  const handleHarmonyPointHover = useCallback((point, index) => {
-    const color = getColorAtPoint(point.x + radius, point.y + radius);
-    setTooltip({
-      x: point.x + radius,
-      y: point.y + radius - 20,
-      text: `${color.hexString} (${index + 1}/${harmonyPoints.length})`
+  const extractColorsFromGamutArea = useCallback(() => {
+    if (!gamutMask || !stageRef.current) return;
+
+    const stage = stageRef.current;
+    const canvas = stage.toCanvas();
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    const colors = new Set();
+
+    // Get gamut mask points in stage coordinates
+    const gamutGroup = gamutGroupRef.current;
+    const gamutPoints = gamutMask.map(point => {
+      const transformed = gamutGroup.getAbsoluteTransform().point({
+        x: point.x - radius,
+        y: point.y - radius
+      });
+      return transformed;
     });
-  }, [getColorAtPoint, harmonyPoints.length, radius]);
 
-  const handleHarmonyDragMove = useCallback((e) => {
-    const stage = e.target.getStage();
-    const pointer = stage.getPointerPosition();
-    
-    // Calculate angle between center and current mouse position
-    const dx = pointer.x - radius;
-    const dy = pointer.y - radius;
-    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-    
-    // Normalize angle to 0-360 range
-    const normalizedAngle = (angle + 360) % 360;
-    
-    setRotation(normalizedAngle);
+    // Function to check if a point is inside the gamut polygon
+    const isPointInPolygon = (x, y, vertices) => {
+      let inside = false;
+      for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
+        const xi = vertices[i].x, yi = vertices[i].y;
+        const xj = vertices[j].x, yj = vertices[j].y;
+        
+        const intersect = ((yi > y) !== (yj > y))
+            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    };
 
-    // Reset position to center to prevent actual movement
-    if (harmonyGroupRef.current) {
-      harmonyGroupRef.current.position({ x: radius, y: radius });
+    // Sample colors from points inside the gamut mask
+    const sampleStep = 5; // Sample every 5 pixels for performance
+    for (let y = 0; y < canvas.height; y += sampleStep) {
+      for (let x = 0; x < canvas.width; x += sampleStep) {
+        if (isPointInPolygon(x, y, gamutPoints)) {
+          const i = (y * canvas.width + x) * 4;
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const color = tinycolor({ r, g, b });
+          colors.add(color.toHexString());
+        }
+      }
     }
-  }, [radius]);
+
+    // Convert colors to the standard format
+    const colorData = Array.from(colors).map(hexString => {
+      const color = tinycolor(hexString);
+      return {
+        rgb: color.toRgb(),
+        rgbString: color.toRgbString(),
+        hex: color.toHex(),
+        hexString: color.toHexString(),
+        hsv: color.toHsv(),
+        hsvString: color.toHsvString(),
+        hsl: color.toHsl(),
+        hslString: color.toHslString()
+      };
+    });
+
+    // Sort colors by hue
+    colorData.sort((a, b) => a.hsl.h - b.hsl.h);
+    
+    // Limit to 12 colors
+    const filteredColors = colorData.filter((_, index) => index % Math.ceil(colorData.length / 12) === 0).slice(0, 12);
+    setExtractedColors(filteredColors);
+  }, [gamutMask, radius]);
+
+  const handleAddToPalette = useCallback(() => {
+    if (extractedColors.length > 0 && onAddToPalette) {
+      onAddToPalette(extractedColors);
+    }
+  }, [extractedColors, onAddToPalette]);
 
   return (
     <div className="color-wheel-container">
@@ -357,172 +391,195 @@ const ColorWheel = ({
             </select>
           </div>
         )}
-
-        <div className="harmony-controls">
-          <select 
-            className="harmony-select"
-            value={harmonyMode}
-            onChange={(e) => handleHarmonyChange(e.target.value)}
-          >
-            {Object.keys(HARMONY_MODES).map(mode => (
-              <option key={mode} value={mode}>{mode}</option>
-            ))}
-          </select>
-          <button 
-            className="add-harmony-button"
-            onClick={handleAddToPalette}
-            disabled={!harmonyPoints.length}
-          >
-            <span>Add Harmony to Palette</span>
-            <span>({harmonyPoints.length} colors)</span>
-          </button>
-        </div>
       </div>
 
       <div className="wheel-wrapper">
+        {gamutMask && (
+          <button 
+            className="extract-colors-button"
+            onClick={extractColorsFromGamutArea}
+          >
+            Extract Colors from Gamut Area
+          </button>
+        )}
         <div className="rotation-hint">
-          Use arrow keys or click and drag to rotate harmony points
+          Use arrow keys or click and drag to rotate gamut mask
         </div>
         
         <Stage
           width={actualDiameter}
           height={actualDiameter}
           ref={stageRef}
-          onClick={handleClick}
-          onTouchStart={handleClick}
+          onClick={handleStageClick}
+          onMouseDown={checkDeselect}
+          onTouchStart={(e) => {
+            checkDeselect(e);
+            handleStageClick(e);
+          }}
           style={{ display: 'block', margin: '0 auto' }}
         >
-        <Layer>
-          {wheelMode === 'regular' ? (
-            lines.map((line) => (
-              <Line
-                key={line.key}
-                points={line.points}
-                fill={line.fill}
-                closed={line.closed}
-                stroke={line.stroke}
-                strokeWidth={line.strokeWidth}
+          <Layer>
+            {wheelMode === 'regular' ? (
+              lines.map((line) => (
+                <Line
+                  key={line.key}
+                  points={line.points}
+                  fill={line.fill}
+                  closed={line.closed}
+                  stroke={line.stroke}
+                  strokeWidth={line.strokeWidth}
+                />
+              ))
+            ) : wheelImage && (
+              <Image
+                image={wheelImage}
+                width={actualDiameter}
+                height={actualDiameter}
               />
-            ))
-          ) : wheelImage && (
-            <Image
-              image={wheelImage}
-              width={actualDiameter}
-              height={actualDiameter}
-            />
-          )}
-          {centerCircle && (
-            <Circle
-              x={centerCircle.x}
-              y={centerCircle.y}
-              radius={centerCircle.radius}
-              fill={centerCircle.fill}
-              stroke={centerCircle.stroke}
-              strokeWidth={centerCircle.strokeWidth}
-            />
-          )}
-          {gamutMask && (
-            <Group
-              ref={gamutGroupRef}
-              x={radius}
-              y={radius}
-              draggable
-              onDragEnd={handleGamutDragEnd}
-            >
-              {gamutMask.map((point, i) => (
-                <Line
-                  key={`gamut-${i}`}
-                  points={[
-                    0, 0,
-                    point.x - radius, point.y - radius,
-                    gamutMask[(i + 1) % gamutMask.length].x - radius,
-                    gamutMask[(i + 1) % gamutMask.length].y - radius
-                  ]}
-                  fill="rgba(255,255,255,0.3)"
-                  closed={true}
-                  stroke="black"
-                  strokeWidth={1}
-                />
-              ))}
-            </Group>
-          )}
-          {gamutMask && (
-            <Transformer
-              ref={transformerRef}
-              rotationSnaps={[0, 45, 90, 135, 180, 225, 270, 315]}
-              resizeEnabled={false}
-              borderEnabled={false}
-              anchorSize={20}
-              anchorCornerRadius={10}
-              anchorStroke="#4CAF50"
-              anchorFill="white"
-              anchorStrokeWidth={2}
-              padding={5}
-            />
-          )}
-          <Group
-            ref={harmonyGroupRef}
-            x={radius}
-            y={radius}
-            draggable
-            onDragMove={handleHarmonyDragMove}
-          >
-            {harmonyPoints.map((point, i) => (
-              <Group key={`harmony-${i}`} className="harmony-point">
-                <Circle
-                  x={point.x}
-                  y={point.y}
-                  radius={5}
-                  fill="white"
-                  stroke="black"
-                  strokeWidth={1}
-                  onMouseEnter={(e) => {
-                    const container = e.target.getStage().container();
-                    container.style.cursor = 'pointer';
-                    handleHarmonyPointHover(point, i);
-                  }}
-                  onMouseLeave={(e) => {
-                    const container = e.target.getStage().container();
-                    container.style.cursor = 'default';
-                    setTooltip(null);
-                  }}
-                />
-                <Line
-                  points={[0, 0, point.x, point.y]}
-                  stroke="rgba(0,0,0,0.3)"
-                  strokeWidth={1}
-                />
-              </Group>
-            ))}
-          </Group>
-          {tooltip && (
-            <Group>
-              <Label
-                x={tooltip.x}
-                y={tooltip.y}
-                offsetY={30}
+            )}
+            {centerCircle && (
+              <Circle
+                x={centerCircle.x}
+                y={centerCircle.y}
+                radius={centerCircle.radius}
+                fill={centerCircle.fill}
+                stroke={centerCircle.stroke}
+                strokeWidth={centerCircle.strokeWidth}
+              />
+            )}
+            {gamutMask && (
+              <Group
+                ref={gamutGroupRef}
+                x={radius}
+                y={radius}
+                draggable
+                onClick={handleGamutClick}
+                onTap={handleGamutClick}
+                onDragEnd={handleGamutDragEnd}
+                onTransformEnd={(e) => {
+                  const node = gamutGroupRef.current;
+                  const scaleX = node.scaleX();
+                  const scaleY = node.scaleY();
+                  
+                  // Reset scale and update points
+                  node.scaleX(1);
+                  node.scaleY(1);
+                  
+                  // Update gamut mask points with new scale
+                  const newPoints = gamutMask.map(point => ({
+                    x: radius + (point.x - radius) * scaleX,
+                    y: radius + (point.y - radius) * scaleY
+                  }));
+                  setGamutMask(newPoints);
+                  
+                  // Update rotation state
+                  setRotation(node.rotation());
+                }}
               >
-                <Tag
-                  fill="rgba(0,0,0,0.8)"
-                  cornerRadius={3}
-                  pointerDirection="down"
-                  pointerWidth={10}
-                  pointerHeight={5}
-                  lineJoin="round"
-                />
-                <Text
-                  text={tooltip.text}
-                  padding={6}
-                  fill="white"
-                  fontSize={11}
-                  fontFamily="monospace"
-                />
-              </Label>
-            </Group>
-          )}
-        </Layer>
-      </Stage>
+                {gamutMask.map((point, i) => (
+                  <Line
+                    key={`gamut-${i}`}
+                    points={[
+                      0, 0,
+                      point.x - radius, point.y - radius,
+                      gamutMask[(i + 1) % gamutMask.length].x - radius,
+                      gamutMask[(i + 1) % gamutMask.length].y - radius
+                    ]}
+                    fill="rgba(255,255,255,0.3)"
+                    closed={true}
+                    stroke="black"
+                    strokeWidth={3}
+                    hitStrokeWidth={10}
+                    onClick={handleGamutClick}
+                    onTap={handleGamutClick}
+                  />
+                ))}
+              </Group>
+            )}
+            {gamutMask && isSelected && (
+              <Transformer
+                ref={transformerRef}
+                rotationSnaps={[0, 45, 90, 135, 180, 225, 270, 315]}
+                resizeEnabled={true}
+                enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
+                borderEnabled={false}
+                anchorSize={20}
+                anchorCornerRadius={10}
+                anchorStroke="#4CAF50"
+                anchorFill="white"
+                anchorStrokeWidth={2}
+                padding={5}
+                boundBoxFunc={(oldBox, newBox) => {
+                  // Maintain aspect ratio
+                  const oldWidth = oldBox.width;
+                  const oldHeight = oldBox.height;
+                  const newWidth = newBox.width;
+                  const newHeight = newBox.height;
+                  
+                  const scale = Math.min(
+                    Math.abs(newWidth / oldWidth),
+                    Math.abs(newHeight / oldHeight)
+                  );
+                  
+                  return {
+                    x: newBox.x,
+                    y: newBox.y,
+                    width: oldWidth * scale,
+                    height: oldHeight * scale,
+                    rotation: newBox.rotation
+                  };
+                }}
+              />
+            )}
+            {tooltip && (
+              <Group>
+                <Label
+                  x={tooltip.x}
+                  y={tooltip.y}
+                  offsetY={30}
+                >
+                  <Tag
+                    fill="rgba(0,0,0,0.8)"
+                    cornerRadius={3}
+                    pointerDirection="down"
+                    pointerWidth={10}
+                    pointerHeight={5}
+                    lineJoin="round"
+                  />
+                  <Text
+                    text={tooltip.text}
+                    padding={6}
+                    fill="white"
+                    fontSize={11}
+                    fontFamily="monospace"
+                  />
+                </Label>
+              </Group>
+            )}
+          </Layer>
+        </Stage>
       </div>
+
+      {extractedColors.length > 0 && (
+        <div className="extracted-colors">
+          <div className="color-swatches">
+            {extractedColors.map((color, index) => (
+              <div
+                key={index}
+                className="color-swatch"
+                style={{ backgroundColor: color.hexString }}
+                title={`${color.hexString}\n${color.rgbString}`}
+              />
+            ))}
+          </div>
+          <button 
+            className="add-colors-button"
+            onClick={handleAddToPalette}
+          >
+            Add Colors to Palette
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Stage, Layer, Circle, Group, Label, Tag, Text, Line } from 'react-konva';
+import React, { useState, useCallback, useRef } from 'react';
+import { Stage, Layer, Circle, Group, Label, Tag, Text, Line, Transformer } from 'react-konva';
 import ColorThief from 'colorthief';
 import tinycolor from 'tinycolor2';
 import './ReverseGamut.css';
@@ -30,6 +30,9 @@ const ReverseGamut = ({ onAddToPalette, wheelMode = 'regular' }) => {
   const [tooltip, setTooltip] = useState(null);
   const [diameter, setDiameter] = useState(500);
   const [loadedImages, setLoadedImages] = useState({});
+  const [isSelected, setIsSelected] = useState(false);
+  const shapeRef = useRef();
+  const transformerRef = useRef();
   const radius = diameter / 2;
 
   // Preload sample images
@@ -62,6 +65,14 @@ const ReverseGamut = ({ onAddToPalette, wheelMode = 'regular' }) => {
 
     return () => window.removeEventListener('resize', updateDiameter);
   }, []);
+
+  // Effect to attach transformer to shape
+  React.useEffect(() => {
+    if (isSelected && shapeRef.current && transformerRef.current) {
+      transformerRef.current.nodes([shapeRef.current]);
+      transformerRef.current.getLayer().batchDraw();
+    }
+  }, [isSelected]);
 
   const handleImageLoad = useCallback((imageElement, isPreset = false) => {
     const colorThief = new ColorThief();
@@ -214,24 +225,91 @@ const ReverseGamut = ({ onAddToPalette, wheelMode = 'regular' }) => {
     }
   }, [extractedColors, onAddToPalette]);
 
+  const checkDeselect = (e) => {
+    // deselect when clicked on empty area
+    const clickedOnEmpty = e.target === e.target.getStage();
+    if (clickedOnEmpty) {
+      setIsSelected(false);
+    }
+  };
+
   return (
     <div className="reverse-gamut">
       <div className="color-wheel-container" style={{ width: diameter, height: diameter, position: 'relative' }}>
         <div className="color-wheel-background" />
-        <Stage width={diameter} height={diameter} style={{ position: 'absolute', top: 0, left: 0 }}>
+        <Stage 
+          width={diameter} 
+          height={diameter} 
+          style={{ position: 'absolute', top: 0, left: 0 }}
+          onClick={checkDeselect}
+          onTap={checkDeselect}
+        >
           <Layer>
             {/* Draw gamut boundary shape */}
             {boundaryPoints.length > 0 && (
-              <Line
-                points={[
-                  ...boundaryPoints.map(point => [point.x, point.y]).flat(),
-                  boundaryPoints[0].x, boundaryPoints[0].y // Close the shape
-                ]}
-                stroke="rgba(255,255,255,0.5)"
-                strokeWidth={1}
-                closed={true}
-                fill="rgba(255,255,255,0.1)"
-              />
+              <>
+                <Line
+                  ref={shapeRef}
+                  points={[
+                    ...boundaryPoints.map(point => [point.x, point.y]).flat(),
+                    boundaryPoints[0].x, boundaryPoints[0].y // Close the shape
+                  ]}
+                  stroke="rgba(255,255,255,0.5)"
+                  strokeWidth={1}
+                  closed={true}
+                  fill="rgba(255,255,255,0.1)"
+                  draggable
+                  onClick={() => setIsSelected(true)}
+                  onTap={() => setIsSelected(true)}
+                  onTransformEnd={(e) => {
+                    // Get the shape node
+                    const node = shapeRef.current;
+                    const scaleX = node.scaleX();
+                    const scaleY = node.scaleY();
+                    
+                    // Reset scale and adjust points
+                    node.scaleX(1);
+                    node.scaleY(1);
+                    
+                    // Update points with new scale
+                    const newPoints = node.points().map((point, i) => {
+                      if (i % 2 === 0) {
+                        return point * scaleX;
+                      }
+                      return point * scaleY;
+                    });
+                    
+                    node.points(newPoints);
+                  }}
+                />
+                {isSelected && (
+                  <Transformer
+                    ref={transformerRef}
+                    boundBoxFunc={(oldBox, newBox) => {
+                      // Limit resize to maintain proportion
+                      const oldWidth = oldBox.width;
+                      const oldHeight = oldBox.height;
+                      const newWidth = newBox.width;
+                      const newHeight = newBox.height;
+                      
+                      const scale = Math.min(
+                        Math.abs(newWidth / oldWidth),
+                        Math.abs(newHeight / oldHeight)
+                      );
+                      
+                      return {
+                        x: newBox.x,
+                        y: newBox.y,
+                        width: oldWidth * scale,
+                        height: oldHeight * scale,
+                        rotation: newBox.rotation
+                      };
+                    }}
+                    rotateEnabled={true}
+                    enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
+                  />
+                )}
+              </>
             )}
             
             {/* Draw extracted color points */}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ColorWheel from './ColorWheel';
+import HarmonyWheel from './HarmonyWheel';
 import ImageColorPicker from './ImageColorPicker';
 import ReverseGamut from './ReverseGamut';
 import usePalettes from '../hooks/usePalettes';
@@ -66,11 +67,10 @@ const Stage = () => {
     switch (activeTab) {
       case 'harmony':
         return (
-          <ColorWheel 
+          <HarmonyWheel 
             onColorSelect={color => handleAddToPalette([color])}
             onAddToPalette={handleAddToPalette}
             wheelMode={wheelMode}
-            gamutShape={null}
           />
         );
       case 'gamut':

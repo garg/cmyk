@@ -108,6 +108,45 @@ export const snapToYurmby = (angle) => {
   return sector ? sector.snap : angle;
 };
 
+export const isPointInPolygon = (point, polygon) => {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x, yi = polygon[i].y;
+    const xj = polygon[j].x, yj = polygon[j].y;
+    
+    const intersect = ((yi > point.y) !== (yj > point.y))
+        && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+};
+
+export const rotatePoint = (point, center, angle) => {
+  const radians = (angle * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const dx = point.x - center.x;
+  const dy = point.y - center.y;
+  
+  return {
+    x: center.x + (dx * cos - dy * sin),
+    y: center.y + (dx * sin + dy * cos)
+  };
+};
+
+export const calculateGamutMaskPoints = (shape, center, radius, rotation = 0) => {
+  const points = shape.map(point => ({
+    x: center.x + Math.cos(point.angle * Math.PI / 180) * radius * point.distance,
+    y: center.y + Math.sin(point.angle * Math.PI / 180) * radius * point.distance
+  }));
+
+  if (rotation !== 0) {
+    return points.map(point => rotatePoint(point, center, rotation));
+  }
+
+  return points;
+};
+
 export const calculateHarmonyAngles = (baseAngle, harmonyType) => {
   const angles = [];
   switch (harmonyType) {
@@ -188,45 +227,6 @@ export const calculateHarmonyAngles = (baseAngle, harmonyType) => {
       );
   }
   return angles;
-};
-
-export const isPointInPolygon = (point, polygon) => {
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const xi = polygon[i].x, yi = polygon[i].y;
-    const xj = polygon[j].x, yj = polygon[j].y;
-    
-    const intersect = ((yi > point.y) !== (yj > point.y))
-        && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
-    if (intersect) inside = !inside;
-  }
-  return inside;
-};
-
-export const rotatePoint = (point, center, angle) => {
-  const radians = (angle * Math.PI) / 180;
-  const cos = Math.cos(radians);
-  const sin = Math.sin(radians);
-  const dx = point.x - center.x;
-  const dy = point.y - center.y;
-  
-  return {
-    x: center.x + (dx * cos - dy * sin),
-    y: center.y + (dx * sin + dy * cos)
-  };
-};
-
-export const calculateGamutMaskPoints = (shape, center, radius, rotation = 0) => {
-  const points = shape.map(point => ({
-    x: center.x + Math.cos(point.angle * Math.PI / 180) * radius * point.distance,
-    y: center.y + Math.sin(point.angle * Math.PI / 180) * radius * point.distance
-  }));
-
-  if (rotation !== 0) {
-    return points.map(point => rotatePoint(point, center, rotation));
-  }
-
-  return points;
 };
 
 export const getColorName = (hex) => {
