@@ -68,7 +68,8 @@ const ColorWheel = ({
   onColorSelect,
   gamutShape = null,
   onAddToPalette,
-  wheelMode = 'regular' // 'regular' or 'yurmby'
+  wheelMode = 'regular', // 'regular' or 'yurmby'
+  setWheelMode
 }) => {
   const [extractedColors, setExtractedColors] = useState([]);
   const stageRef = useRef(null);
@@ -389,19 +390,27 @@ const ColorWheel = ({
                 </option>
               ))}
             </select>
+            <select
+              className="wheel-mode-select"
+              value={wheelMode}
+              onChange={(e) => setWheelMode(e.target.value)}
+            >
+              <option value="regular">Regular Wheel</option>
+              <option value="yurmby">YURMBY Wheel</option>
+            </select>
+            {gamutMask && (
+              <button 
+                className="extract-colors-button"
+                onClick={extractColorsFromGamutArea}
+              >
+                Extract Colors from Gamut Area
+              </button>
+            )}
           </div>
         )}
       </div>
 
       <div className="wheel-wrapper">
-        {gamutMask && (
-          <button 
-            className="extract-colors-button"
-            onClick={extractColorsFromGamutArea}
-          >
-            Extract Colors from Gamut Area
-          </button>
-        )}
         
         <Stage
           width={actualDiameter}

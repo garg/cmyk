@@ -85,6 +85,7 @@ const Stage = ({ initialMode }) => {
             onColorSelect={color => handleAddToPalette([color])}
             onAddToPalette={handleAddToPalette}
             wheelMode={wheelMode}
+            setWheelMode={setWheelMode}
             gamutShape="fiveSidedPolygon"
           />
         );
@@ -110,46 +111,34 @@ const Stage = ({ initialMode }) => {
     <div className="stage-container">
       <div className="stage-grid">
         <div className="stage-left">
-          <div className="stage-controls">
-            <div className="stage-tabs">
-              <button 
-                className={`tab-button ${activeTab === 'harmony' ? 'active' : ''}`}
-                onClick={() => navigate('/harmonies')}
-              >
-                Harmonies
-              </button>
-              <button 
-                className={`tab-button ${activeTab === 'gamut' ? 'active' : ''}`}
-                onClick={() => navigate('/gamut-masks')}
-              >
-                Gamut Masks
-              </button>
-              <button 
-                className={`tab-button ${activeTab === 'image' ? 'active' : ''}`}
-                onClick={() => navigate('/image-picker')}
-              >
-                Image
-              </button>
-              <button 
-                className={`tab-button ${activeTab === 'reverse' ? 'active' : ''}`}
-                onClick={() => navigate('/reverse-gamut')}
-              >
-                Reverse Gamut
-              </button>
-            </div>
-            {(activeTab === 'harmony' || activeTab === 'gamut') && (
-              <div className="wheel-mode-control">
-                <select
-                  className="wheel-mode-select"
-                  value={wheelMode}
-                  onChange={(e) => setWheelMode(e.target.value)}
+            <div className="stage-controls">
+              <div className="stage-tabs">
+                <button 
+                  className={`tab-button ${activeTab === 'harmony' ? 'active' : ''}`}
+                  onClick={() => navigate('/harmonies')}
                 >
-                  <option value="regular">Regular Wheel</option>
-                  <option value="yurmby">YURMBY Wheel</option>
-                </select>
+                  Harmonies
+                </button>
+                <button 
+                  className={`tab-button ${activeTab === 'gamut' ? 'active' : ''}`}
+                  onClick={() => navigate('/gamut-masks')}
+                >
+                  Gamut Masks
+                </button>
+                <button 
+                  className={`tab-button ${activeTab === 'image' ? 'active' : ''}`}
+                  onClick={() => navigate('/image-picker')}
+                >
+                  Image
+                </button>
+                <button 
+                  className={`tab-button ${activeTab === 'reverse' ? 'active' : ''}`}
+                  onClick={() => navigate('/reverse-gamut')}
+                >
+                  Reverse Gamut
+                </button>
               </div>
-            )}
-          </div>
+            </div>
           {renderTabContent()}
         </div>
 
