@@ -203,6 +203,48 @@ const ImageColorPicker = ({ onAddToPalette }) => {
                     height={height}
                     x={x}
                     y={y}
+                    onClick={(e) => {
+                      const stage = e.target.getStage();
+                      const pointerPos = stage.getPointerPosition();
+                      
+                      // Create a temporary canvas to get the color
+                      const tempCanvas = document.createElement('canvas');
+                      const tempCtx = tempCanvas.getContext('2d');
+                      tempCanvas.width = width;
+                      tempCanvas.height = height;
+                      
+                      // Draw the image at the same scale and position
+                      tempCtx.drawImage(image, 0, 0, width, height);
+                      
+                      // Get the color at the clicked position, adjusting for image position
+                      const imageX = Math.floor(pointerPos.x - x);
+                      const imageY = Math.floor(pointerPos.y - y);
+                      const pixel = tempCtx.getImageData(imageX, imageY, 1, 1).data;
+                      
+                      // Create color data in the same format as other colors
+                      const color = tinycolor({ r: pixel[0], g: pixel[1], b: pixel[2] });
+                      const colorData = {
+                        rgb: { r: pixel[0], g: pixel[1], b: pixel[2] },
+                        rgbString: color.toRgbString(),
+                        hex: color.toHex(),
+                        hexString: color.toHexString(),
+                        hsv: color.toHsv(),
+                        hsvString: color.toHsvString(),
+                        hsl: color.toHsl(),
+                        hslString: color.toHslString()
+                      };
+                      
+                      // Add the color to the palette
+                      onAddToPalette([colorData]);
+                    }}
+                    onMouseEnter={(e) => {
+                      const container = e.target.getStage().container();
+                      container.style.cursor = 'crosshair';
+                    }}
+                    onMouseLeave={(e) => {
+                      const container = e.target.getStage().container();
+                      container.style.cursor = 'default';
+                    }}
                   />
                 );
               })()}
