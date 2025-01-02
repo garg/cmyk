@@ -102,71 +102,114 @@ const ImageColorPicker = ({ onAddToPalette }) => {
   }, [extractedColors, onAddToPalette]);
 
   return (
-    <div className="image-color-picker">
-      <div 
-        ref={dropZoneRef}
-        className={`drop-zone ${isDragging ? 'dragging' : ''} ${image ? 'has-image' : ''}`}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-      >
-        {!image ? (
-          <>
-            <div className="drop-zone-content">
-              <p>Drag and drop an image here</p>
-              <p>or</p>
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                className="file-select-button"
+    <div className="color-wheel-container">
+      <div className="controls-wrapper">
+        <div className="gamut-controls">
+          <div className="gamut-controls-inputs">
+            {!image ? (
+              <div 
+                ref={dropZoneRef}
+                className={`drop-zone ${isDragging ? 'dragging' : ''}`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
               >
-                Select Image
-              </button>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              style={{ display: 'none' }}
-            />
-          </>
+                <div className="drop-zone-content">
+                  <p>Drag and drop an image here</p>
+                  <p>or</p>
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="file-select-button"
+                  >
+                    Select Image
+                  </button>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            ) : (
+              <>
+                <button 
+                  className="image-action-button"
+                  onClick={() => {
+                    setImage(null);
+                    setExtractedColors([]);
+                  }}
+                >
+                  Change Image
+                </button>
+                {extractedColors.length > 0 && (
+                  <div className="extracted-colors">
+                    <div className="color-swatches">
+                      {extractedColors.map((color, index) => (
+                        <div
+                          key={index}
+                          className="color-swatch"
+                          style={{ backgroundColor: color.hexString }}
+                          title={`${color.hexString}\n${color.rgbString}`}
+                        />
+                      ))}
+                    </div>
+                    <button 
+                      className="add-colors-button"
+                      onClick={handleAddToPalette}
+                    >
+                      Add Colors to Palette
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="image-wrapper">
+        {!image ? (
+          <div className="empty-image-placeholder">
+            <p>Selected image will appear here</p>
+          </div>
         ) : (
           <Stage
-            width={450}
-            height={450}
+            width={500}
+            height={500}
+            style={{ display: 'block', margin: '0 auto' }}
           >
             <Layer>
-              <KonvaImage
-                ref={imageRef}
-                image={image}
-                width={image.width}
-                height={image.height}
-              />
+              {(() => {
+                // Calculate scale to cover the entire canvas
+                const scaleX = 500 / image.width;
+                const scaleY = 500 / image.height;
+                const scale = Math.max(scaleX, scaleY);
+                
+                // Calculate dimensions that will cover the canvas
+                const width = image.width * scale;
+                const height = image.height * scale;
+                
+                // Center the image
+                const x = (500 - width) / 2;
+                const y = (500 - height) / 2;
+                
+                return (
+                  <KonvaImage
+                    ref={imageRef}
+                    image={image}
+                    width={width}
+                    height={height}
+                    x={x}
+                    y={y}
+                  />
+                );
+              })()}
             </Layer>
           </Stage>
         )}
       </div>
-
-      {extractedColors.length > 0 && (
-        <div className="extracted-colors">
-          <div className="color-swatches">
-            {extractedColors.map((color, index) => (
-              <div
-                key={index}
-                className="color-swatch"
-                style={{ backgroundColor: color.hexString }}
-                title={`${color.hexString}\n${color.rgbString}`}
-              />
-            ))}
-          </div>
-          <button 
-            className="add-colors-button"
-            onClick={handleAddToPalette}
-          >
-            Add Colors to Palette
-          </button>
-        </div>
-      )}
     </div>
   );
 };
