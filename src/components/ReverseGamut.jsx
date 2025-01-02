@@ -234,13 +234,97 @@ const ReverseGamut = ({ onAddToPalette, wheelMode = 'regular' }) => {
   };
 
   return (
-    <div className="reverse-gamut">
-      <div className="color-wheel-container" style={{ width: diameter, height: diameter, position: 'relative' }}>
+    <div className="color-wheel-container">
+      <div className="controls-wrapper">
+        <div className="gamut-controls">
+          <div className="gamut-controls-inputs">
+            <div 
+              className={`drop-zone ${isDragging ? 'dragging' : ''} ${image ? 'has-image' : ''}`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+            >
+              {!image ? (
+                <>
+                  <div className="image-section">
+                    <div className="sample-images">
+                      {SAMPLE_IMAGES.map((sampleImage, index) => (
+                        <img
+                          key={index}
+                          src={sampleImage.src}
+                          alt={sampleImage.name}
+                          className={`sample-image ${selectedSample === index ? 'selected' : ''}`}
+                          onClick={() => {
+                            if (loadedImages[sampleImage.name]) {
+                              setSelectedSample(index);
+                              handleImageLoad(loadedImages[sampleImage.name], true);
+                            }
+                          }}
+                        />
+                      ))}
+                    </div>
+                    
+                    <div className="drop-zone-content">
+                      <p>Drag and drop an image here</p>
+                      <p>or</p>
+                      <button 
+                        onClick={() => document.getElementById('file-input').click()}
+                        className="file-select-button"
+                      >
+                        Select Image
+                      </button>
+                    </div>
+                    <input
+                      id="file-input"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      style={{ display: 'none' }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="image-preview">
+                  <div className="image-preview-container">
+                    <img 
+                      src={image.src} 
+                      alt="Selected" 
+                    />
+                  </div>
+                  <div className="image-actions">
+                    <button 
+                      className="image-action-button"
+                      onClick={() => {
+                        setImage(null);
+                        setSelectedSample(null);
+                        setExtractedColors([]);
+                        setBoundaryPoints([]);
+                      }}
+                    >
+                      Change Image
+                    </button>
+                  </div>
+                  {extractedColors.length > 0 && (
+                    <button 
+                      className="add-colors-button"
+                      onClick={handleAddToPalette}
+                    >
+                      Add Colors to Palette
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="wheel-wrapper">
         <div className="color-wheel-background" />
         <Stage 
           width={diameter} 
           height={diameter} 
-          style={{ position: 'absolute', top: 0, left: 0 }}
+          style={{ display: 'block', margin: '0 auto' }}
           onClick={checkDeselect}
           onTap={checkDeselect}
         >
@@ -382,83 +466,6 @@ const ReverseGamut = ({ onAddToPalette, wheelMode = 'regular' }) => {
         </Stage>
       </div>
 
-      <div 
-        className={`drop-zone ${isDragging ? 'dragging' : ''} ${image ? 'has-image' : ''}`}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-      >
-        {!image ? (
-          <>
-            <div className="image-section">
-              <div className="sample-images">
-                {SAMPLE_IMAGES.map((sampleImage, index) => (
-                  <img
-                    key={index}
-                    src={sampleImage.src}
-                    alt={sampleImage.name}
-                    className={`sample-image ${selectedSample === index ? 'selected' : ''}`}
-                    onClick={() => {
-                      if (loadedImages[sampleImage.name]) {
-                        setSelectedSample(index);
-                        handleImageLoad(loadedImages[sampleImage.name], true);
-                      }
-                    }}
-                  />
-                ))}
-              </div>
-              
-              <div className="drop-zone-content">
-                <p>Drag and drop an image here</p>
-                <p>or</p>
-                <button 
-                  onClick={() => document.getElementById('file-input').click()}
-                  className="file-select-button"
-                >
-                  Select Image
-                </button>
-              </div>
-              <input
-                id="file-input"
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                style={{ display: 'none' }}
-              />
-            </div>
-          </>
-        ) : (
-          <div className="image-preview">
-            <div className="image-preview-container">
-              <img 
-                src={image.src} 
-                alt="Selected" 
-              />
-            </div>
-            <div className="image-actions">
-              <button 
-                className="image-action-button"
-                onClick={() => {
-                  setImage(null);
-                  setSelectedSample(null);
-                  setExtractedColors([]);
-                  setBoundaryPoints([]);
-                }}
-              >
-                Change Image
-              </button>
-            </div>
-            {extractedColors.length > 0 && (
-              <button 
-                className="add-colors-button"
-                onClick={handleAddToPalette}
-              >
-                Add Colors to Palette
-              </button>
-            )}
-          </div>
-        )}
-      </div>
     </div>
   );
 };
