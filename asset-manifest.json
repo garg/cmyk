@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/cmyk/static/css/main.fedce6dd.css",
-    "main.js": "/cmyk/static/js/main.962e30b7.js",
+    "main.js": "/cmyk/static/js/main.90dc6b85.js",
     "index.html": "/cmyk/index.html",
     "main.fedce6dd.css.map": "/cmyk/static/css/main.fedce6dd.css.map",
-    "main.962e30b7.js.map": "/cmyk/static/js/main.962e30b7.js.map"
+    "main.90dc6b85.js.map": "/cmyk/static/js/main.90dc6b85.js.map"
   },
   "entrypoints": [
     "static/css/main.fedce6dd.css",
-    "static/js/main.962e30b7.js"
+    "static/js/main.90dc6b85.js"
   ]
 }
