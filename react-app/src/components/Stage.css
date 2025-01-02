@@ -6,13 +6,41 @@
 
 .stage-grid {
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 400px);
   gap: 30px;
 }
 
 @media (max-width: 1200px) {
   .stage-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .stage-right {
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .stage-container {
+    padding: 10px;
+  }
+  
+  .stage-grid {
+    gap: 20px;
+  }
+  
+  .stage-tabs {
+    justify-content: center;
+  }
+  
+  .tab-button {
+    padding: 6px 12px;
+    font-size: 13px;
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
   }
 }
 

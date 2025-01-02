@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { Stage, Layer, Circle, Line, Group, Transformer, Label, Tag, Text, Image } from 'react-konva';
 import { hslToRgb, snapToYurmby, createYurmbyGradient } from '../utils/colorUtils';
 import tinycolor from 'tinycolor2';
@@ -89,10 +89,6 @@ const ColorWheel = ({
   const canvasRef = useRef(null);
   const harmonyGroupRef = useRef(null);
   
-  const radius = diameter / 2;
-  const steps = 360;
-  const angleStep = (2 * Math.PI) / steps;
-  
   const [lines, setLines] = useState([]);
   const [centerCircle, setCenterCircle] = useState(null);
   const [gamutMask, setGamutMask] = useState(null);
@@ -100,8 +96,41 @@ const ColorWheel = ({
   const [harmonyMode, setHarmonyMode] = useState('Analogous');
   const [harmonyPoints, setHarmonyPoints] = useState([]);
   const [tooltip, setTooltip] = useState(null);
-  const [selectedGamutShape, setSelectedGamutShape] = useState(gamutShape);
+  const [selectedGamutShape, setSelectedGamutShape] = useState(null);
+
+  // Update selectedGamutShape when gamutShape prop changes
+  useEffect(() => {
+    setSelectedGamutShape(gamutShape);
+  }, [gamutShape]);
   const [wheelImage, setWheelImage] = useState(null);
+  const [actualDiameter, setActualDiameter] = useState(diameter);
+
+  // Derived values
+  const derivedValues = useMemo(() => {
+    const steps = 360;
+    const angleStep = (2 * Math.PI) / steps;
+    const radius = actualDiameter / 2;
+    return { steps, angleStep, radius };
+  }, [actualDiameter]);
+
+  const { steps, angleStep, radius } = derivedValues;
+
+  // Update diameter based on window size
+  useEffect(() => {
+    const updateDiameter = () => {
+      const width = window.innerWidth;
+      if (width <= 600) {
+        setActualDiameter(Math.min(width - 40, diameter)); // 20px padding on each side
+      } else {
+        setActualDiameter(diameter);
+      }
+    };
+
+    window.addEventListener('resize', updateDiameter);
+    updateDiameter(); // Initial call
+
+    return () => window.removeEventListener('resize', updateDiameter);
+  }, [diameter]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -119,8 +148,8 @@ const ColorWheel = ({
   useEffect(() => {
     // Create an offscreen canvas for the color wheel
     const canvas = document.createElement('canvas');
-    canvas.width = diameter;
-    canvas.height = diameter;
+    canvas.width = actualDiameter;
+    canvas.height = actualDiameter;
     const ctx = canvas.getContext('2d');
     canvasRef.current = canvas;
 
@@ -185,7 +214,7 @@ const ColorWheel = ({
       stroke: 'black',
       strokeWidth: 1
     });
-  }, [radius, angleStep, steps, wheelMode, diameter]);
+  }, [radius, angleStep, steps, wheelMode, actualDiameter]);
 
   useEffect(() => {
     if (selectedGamutShape && GAMUT_SHAPES[selectedGamutShape]) {
@@ -312,53 +341,57 @@ const ColorWheel = ({
 
   return (
     <div className="color-wheel-container">
-      {selectedGamutShape && (
-        <div className="gamut-controls">
+      <div className="controls-wrapper">
+        {selectedGamutShape && (
+          <div className="gamut-controls">
+            <select 
+              className="gamut-select"
+              value={selectedGamutShape}
+              onChange={(e) => setSelectedGamutShape(e.target.value)}
+            >
+              {Object.keys(GAMUT_SHAPES).map(shape => (
+                <option key={shape} value={shape}>
+                  {shape.split(/(?=[A-Z])/).join(' ')}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className="harmony-controls">
           <select 
-            className="gamut-select"
-            value={selectedGamutShape}
-            onChange={(e) => setSelectedGamutShape(e.target.value)}
+            className="harmony-select"
+            value={harmonyMode}
+            onChange={(e) => handleHarmonyChange(e.target.value)}
           >
-            {Object.keys(GAMUT_SHAPES).map(shape => (
-              <option key={shape} value={shape}>
-                {shape.split(/(?=[A-Z])/).join(' ')}
-              </option>
+            {Object.keys(HARMONY_MODES).map(mode => (
+              <option key={mode} value={mode}>{mode}</option>
             ))}
           </select>
+          <button 
+            className="add-harmony-button"
+            onClick={handleAddToPalette}
+            disabled={!harmonyPoints.length}
+          >
+            <span>Add Harmony to Palette</span>
+            <span>({harmonyPoints.length} colors)</span>
+          </button>
         </div>
-      )}
-
-      <div className="harmony-controls">
-        <select 
-          className="harmony-select"
-          value={harmonyMode}
-          onChange={(e) => handleHarmonyChange(e.target.value)}
-        >
-          {Object.keys(HARMONY_MODES).map(mode => (
-            <option key={mode} value={mode}>{mode}</option>
-          ))}
-        </select>
-        <button 
-          className="add-harmony-button"
-          onClick={handleAddToPalette}
-          disabled={!harmonyPoints.length}
-        >
-          <span>Add Harmony to Palette</span>
-          <span>({harmonyPoints.length} colors)</span>
-        </button>
       </div>
 
-      <div className="rotation-hint">
-        Use arrow keys or click and drag to rotate harmony points
-      </div>
-
-      <Stage
-        width={diameter}
-        height={diameter}
-        ref={stageRef}
-        onClick={handleClick}
-        onTouchStart={handleClick}
-      >
+      <div className="wheel-wrapper">
+        <div className="rotation-hint">
+          Use arrow keys or click and drag to rotate harmony points
+        </div>
+        
+        <Stage
+          width={actualDiameter}
+          height={actualDiameter}
+          ref={stageRef}
+          onClick={handleClick}
+          onTouchStart={handleClick}
+          style={{ display: 'block', margin: '0 auto' }}
+        >
         <Layer>
           {wheelMode === 'regular' ? (
             lines.map((line) => (
@@ -374,8 +407,8 @@ const ColorWheel = ({
           ) : wheelImage && (
             <Image
               image={wheelImage}
-              width={diameter}
-              height={diameter}
+              width={actualDiameter}
+              height={actualDiameter}
             />
           )}
           {centerCircle && (
@@ -489,6 +522,7 @@ const ColorWheel = ({
           )}
         </Layer>
       </Stage>
+      </div>
     </div>
   );
 };

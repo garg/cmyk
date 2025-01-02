@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import './Stage.css';
 
 const Stage = () => {
-  const [activeTab, setActiveTab] = useState('harmony');
+  const [activeTab, setActiveTab] = useState('reverse');
   const [wheelMode, setWheelMode] = useState('regular');
   const [paletteName, setPaletteName] = useState('');
   const [localPalette, setLocalPalette] = useState([]);
@@ -70,6 +70,7 @@ const Stage = () => {
             onColorSelect={color => handleAddToPalette([color])}
             onAddToPalette={handleAddToPalette}
             wheelMode={wheelMode}
+            gamutShape={null}
           />
         );
       case 'gamut':
@@ -77,8 +78,8 @@ const Stage = () => {
           <ColorWheel 
             onColorSelect={color => handleAddToPalette([color])}
             onAddToPalette={handleAddToPalette}
-            gamutShape="fiveSidedPolygon"
             wheelMode={wheelMode}
+            gamutShape="fiveSidedPolygon"
           />
         );
       case 'image':
