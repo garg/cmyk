@@ -1,38 +1,70 @@
-# Color Wheel Tool
+# Getting Started with Create React App
 
-This is the source code for https://cy.mk, a color picker tool that allows users to generate color schemes using various tecnniques: 
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-# Gamut Masks
+## Available Scripts
 
-Use various 'shapes' to pick your color schemes.
+In the project directory, you can run:
 
-![image](https://cloud.githubusercontent.com/assets/16932/24085716/1ad59b34-0cd7-11e7-9901-9a1b69d4695e.png)
+### `npm start`
 
-# Reverse Gamut Mask
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-Load a painting and find out what 'shape' or section of the color wheel the original artist used for painting the image.
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-![image](https://cloud.githubusercontent.com/assets/16932/24085801/cf5f22fe-0cd8-11e7-87f6-09f282385a54.png)
+### `npm test`
 
-# From Image
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-Pick colors directly from an image
+### `npm run build`
 
-![image](https://cloud.githubusercontent.com/assets/16932/24085767/0feb85fc-0cd8-11e7-87af-e0ae0638348f.png)
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-# Color Harmonies 
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-Use various color harmonies to pick colors. 
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-![image](https://cloud.githubusercontent.com/assets/16932/24085702/ef340dc6-0cd6-11e7-8cf7-842bee28f967.png)
+### `npm run eject`
 
-# Save your palettes 
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-![image](https://cloud.githubusercontent.com/assets/16932/24085846/9f44b222-0cd9-11e7-926c-3a15912a69e9.png)
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-# Export Palettes
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-Export Palettes to a file in the cross platform Adobe Swatch Exchange file format
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-![image](https://cloud.githubusercontent.com/assets/16932/24085855/c11bb1e8-0cd9-11e7-8a0b-2aa9dfd3aac6.png)
+## Learn More
 
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
